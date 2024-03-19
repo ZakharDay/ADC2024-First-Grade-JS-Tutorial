@@ -1,6 +1,7 @@
 const state = {
   mouseDown: false,
-  currentCircle: 0
+  currentCircle: 0,
+  linesShow: [false, false, false, false]
 }
 
 function resetState() {
@@ -10,6 +11,25 @@ function resetState() {
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min
+}
+
+function calcDistance(x1, y1, x2, y2) {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+}
+
+function calcAngle(x1, y1, x2, y2) {
+  return Math.atan2(y2 - y1, x2 - x1)
+}
+
+function getElementCors(element) {
+  const { x, y, width, height } = element.getBoundingClientRect()
+
+  return {
+    x,
+    y,
+    width,
+    height
+  }
 }
 
 function createCircles(quantity) {
@@ -26,17 +46,15 @@ function createCircles(quantity) {
 }
 
 function initDocument() {
-  document.addEventListener('mouseup', () => {
-    resetState()
-    // console.log('mouseup on document')
-  })
-
   document.addEventListener('mousemove', (e) => {
     if (state.mouseDown === true) {
-      // console.log('mousemove', e.pageX, e.pageY, state.currentCircle)
-
       drawLine(e)
     }
+  })
+
+  document.addEventListener('mouseup', () => {
+    resetState()
+    eraseLine()
   })
 }
 
@@ -60,14 +78,19 @@ function initCircle(circleElement) {
 
   circleElement.addEventListener('mousedown', (e) => {
     state.mouseDown = true
-    state.currentCircle = e.target.id.slice(-1)
-
-    // console.log('mousedown', state.currentCircle)
+    state.currentCircle = Number(e.target.id.slice(-1))
   })
 
-  circleElement.addEventListener('mouseup', () => {
+  circleElement.addEventListener('mouseup', (e) => {
+    if (state.currentCircle + 1 === Number(e.target.id.slice(-1))) {
+      state.linesShow[state.currentCircle - 1] = true
+    }
+
+    if (state.currentCircle - 1 === Number(e.target.id.slice(-1))) {
+      state.linesShow[state.currentCircle - 2] = true
+    }
+
     resetState()
-    // console.log('mouseup on circle')
   })
 }
 
@@ -103,17 +126,43 @@ function drawLine(e) {
   line.style.transform = `rotate(${angle}rad)`
 }
 
-function calcDistance(x1, y1, x2, y2) {
-  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+function eraseLine() {
+  const line = document.querySelector('.line')
+  line.style.width = 0
 }
 
-function calcAngle(x1, y1, x2, y2) {
-  return Math.atan2(y2 - y1, x2 - x1)
+function drawLines() {
+  state.linesShow.forEach((lineState, index) => {
+    if (lineState === true) {
+      const lineElement = document.getElementById(`line_${index + 1}`)
+
+      const circleFrom = document.getElementById(`circle_${index + 1}`)
+      const circleTo = document.getElementById(`circle_${index + 2}`)
+
+      const circleFromCors = getElementCors(circleFrom)
+      const circleToCors = getElementCors(circleTo)
+
+      const x1 = circleFromCors.x + circleFromCors.width / 2
+      const y1 = circleFromCors.y + circleFromCors.height / 2
+
+      const x2 = circleToCors.x + circleToCors.width / 2
+      const y2 = circleToCors.y + circleToCors.height / 2
+
+      const distance = calcDistance(x1, y1, x2, y2)
+      const angle = calcAngle(x1, y1, x2, y2)
+
+      lineElement.style.top = `${y1}px`
+      lineElement.style.left = `${x1}px`
+      lineElement.style.width = `${distance}px`
+      lineElement.style.transform = `rotate(${angle}rad)`
+    }
+  })
 }
 
 function cycle() {
   setInterval(() => {
     checkAndPaintBackground()
+    drawLines()
   }, 1000 / 60)
 }
 

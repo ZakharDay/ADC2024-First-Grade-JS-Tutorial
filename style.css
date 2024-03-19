@@ -34,4 +34,5 @@ body,
   height: 2px;
   background-color: blue;
   transform-origin: left center;
+  pointer-events: none;
 }

@@ -26,6 +26,8 @@ body,
   width: 100px;
   text-align: center;
   user-select: none;
+  transition: all 5s linear;
+  z-index: 2;
 }
 
 .line {
@@ -35,4 +37,5 @@ body,
   background-color: blue;
   transform-origin: left center;
   pointer-events: none;
+  z-index: 1;
 }

@@ -159,11 +159,39 @@ function drawLines() {
   })
 }
 
+function moveCircles(circles) {
+  for (let index = 0; index < circles.length; index++) {
+    const circleElement = circles[index]
+    const { width, height } = circleElement.getBoundingClientRect()
+
+    const sectionWidth = circlesSection.getBoundingClientRect().width
+    const sectionHeight = circlesSection.getBoundingClientRect().height
+
+    circleElement.style.top = `${getRandomArbitrary(
+      0,
+      sectionHeight - height
+    )}px`
+
+    circleElement.style.left = `${getRandomArbitrary(
+      0,
+      sectionWidth - width
+    )}px`
+  }
+}
+
 function cycle() {
+  const circles = document.getElementsByClassName('circle')
+
   setInterval(() => {
-    checkAndPaintBackground()
+    // checkAndPaintBackground()
     drawLines()
   }, 1000 / 60)
+
+  moveCircles(circles)
+
+  setInterval(() => {
+    moveCircles(circles)
+  }, 5000)
 }
 
 document.addEventListener('DOMContentLoaded', () => {
